@@ -1,0 +1,21 @@
+-- Table: public.site_information
+
+DROP TABLE public.site_information;
+
+CREATE TABLE public.site_information
+(
+  id serial unique NOT NULL,
+  company character varying(150) NOT NULL,
+  site character varying(150) NOT NULL,
+  main_site boolean NOT NULL,
+  notes character varying(150) ,
+  phone_number character varying(15) NOT NULL,
+  start_date varchar(10) NOT NULL default to_char(CURRENT_DATE, 'yyyymm'),
+  end_date varchar(10) NOT NULL default to_char(CURRENT_DATE, 'yyyymm'),
+  CONSTRAINT site_information_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE public.site_information
+  OWNER TO postgres;

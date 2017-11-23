@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Union Street</title>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/front_end.js"></script>
+	<link rel="stylesheet" type="text/css" href="/css/css_style.css">
+
+</head>
+
+<body>
+	<h1> Database Table </h1>
+	<div class="container">
+		<div class="top">
+
+			<button id="btnGet" class="fetchData" value="on"> Fetch Data </button>
+			<button type="submit" id="btnUpdate" name="update" disabled="disabled">Save And Update</button>
+			<button type="submit" id="btnDelete" name="del"> Delete Data</button>
+			<p> Doble click on table cells to edit the data. </p>
+			<table id="tblData">
+				<tbody id="tbid">
+				<tr>
+					<th> No. </th>
+					<th style="visibility:hidden;"> </th>
+					<th> Company </th>
+					<th> Site </th>
+					<th> Main Site </th>
+					<th> Notes </th>
+					<th> Phone Number </th>
+					<th> Start Date </th>
+					<th> End Date </th>
+				</tr>
+
+			    <tr id="template" class="dataRow">
+			    	<td rel="cb" class="cb"></td>
+			    	<td rel="id" class="id" style="visibility:hidden;"></td>
+			        <td rel="name" class="company"></td>
+			        <td rel="loc" class="site"></td>
+			        <td rel="hq" class="mainSite"></td>
+			        <td rel="info" class="notes"> </td>
+			        <td rel="phnum" class="phNumber"> </td>
+			        <td rel="sd" class="startDate"> </td>
+			        <td rel="ed" class="endDate"> </td>
+    			</tr>
+    		</tbody>
+			</table>
+
+		</div>
+
+		<div class="bottom">
+			<h2> INSERT TO DATABSE </h2>
+			<p> Except for <b> Notes Section </b> (Optional), each remaining <b> Text-Boxes </b> should be <b> Filled-In </b> for correct Insert operation. </p>
+			<form method="post" action="/newEntry" accept-charset="UTF-8" enctype="application/x-www-form-urlencoded">
+				Company: <input type="text" name="company"> </br>
+				Site: <input type="text" name="site"> </br>
+				Main Site: 	<select name="mainSite">
+  								<option value="yes"> Yes </option>
+ 								<option value="no"> No </option>
+							</select> </br>
+						<!--<input type="text" name="mainSite" placeholder="Yes or No"> </br> -->
+				Notes: <input type="text" name="notes"> </br>
+				Phone Number: <input type="text" name="phNumber"> </br>
+				Start Date: <input type="text" name="startDate" placeholder="dd/mm/yyyy"> </br>
+				End Date: <input type="text" name="endDate" placeholder="dd/mm/yyyy"> </br>
+				<input type="submit" value="Submit">
+			</form>
+		</div>
+	</div>
+</body>
+</html>
