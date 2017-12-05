@@ -1,0 +1,154 @@
+var socket = io.connect();
+var storeIndex = []; // stores table row index
+var data = []; // stores incoming data from server-side
+
+// get ragional ratings
+socket.on('db', function(incomingData){
+	console.log("Socket emit");
+	data = [];
+	data = incomingData;
+	console.log(data.length);
+});
+
+$(document).ready(function() {
+    $('#btnGet').on('click', function() {	
+    	console.log(" Data length " + data.length);
+    	
+    	$('#datatbl tbody').empty();
+
+		$.each(data, function(rowIndex, r) {
+		    var row = $("<tr/>");
+		    $.each(r, function(colIndex, c) { 
+		        row.append($("<td/>").text(c));
+		    });
+		    $('#tblbody').append(row);
+		});
+	});
+});
+
+$(function(){
+	$("#btnDelete").click(function(){
+		var delPackage ={};
+
+		var checkedValues = $('input:checked').map(function() {
+    		return this.value;
+		}).get();
+
+		for(i =0; i < checkedValues.length; i++){
+			console.log("cb test " + checkedValues[i]);
+		}
+
+		if(checkedValues.length > 0) {
+			delPackage["id"] = checkedValues;
+
+			$.ajax({
+	      		type : 'POST',
+	      		url : '/deleteDB',
+	      		headers : {'Content-Type' : 'application/json'},
+	      		data : JSON.stringify(delPackage),
+	      		success : function(result) {
+	      			$('#btnUpdate').prop('disabled', true);
+	      			window.alert("Data Deleted.");
+	      			location.reload();
+	      		}
+	    	});
+		} else {
+			$('#btnUpdate').prop('disabled', true);
+			window.alert("No data selected.");
+			location.reload();
+		}
+
+	});
+});
+
+// for updating the table
+$(function(){
+	$('#tblbody').on('dblclick', 'tr', function() {
+		console.log("dbl click");
+		var $this = $(this).child;
+		var $input = $('<input>', {
+			value: $this.text(),
+			type: 'text',
+			blur: function() {
+				$this.text(this.value);
+			},
+		keyup: function(e) {
+		   		if (e.which === 20) $input.blur();
+			}
+		})
+		.appendTo( $this.empty() ).focus();
+	});
+});
+
+// get table first row value
+$(function(){
+	$("#datatbl td").on('change', function(){
+		var $this = $(this);
+		$('#btnUpdate').prop('disabled', false);
+
+		var i = $this.parent().index();
+
+		storeIndex.push(i);
+	})
+});
+
+// updating the table row
+$(function(){
+	$("#btnUpdate").click(function(){
+		var uniqueIndex = getUniqueRowIndex(storeIndex);
+
+		// stores changed data
+		var storeData = getRowData(uniqueIndex);
+
+		$.ajax({
+      		type : 'POST',
+      		url : '/updateDB',
+      		headers : {'Content-Type' : 'application/json'},
+      		data : JSON.stringify(storeData),
+      		success : function(result) {
+      			$('#btnUpdate').prop('disabled', true);
+      			window.alert("Database Modified.");
+      			location.reload();
+      		}
+    	});
+	});
+});
+
+// checks for dublicates in an array
+function getUniqueRowIndex(li) {
+	var result = [];
+
+	$.each(li, function(i, e) {
+		if ($.inArray(e, result) == -1) {
+			console.log("index " + e);
+			result.push(e);
+		}
+	});
+	
+	return result;
+}
+
+function getRowData(li){
+	var store = {};
+	var dbList = [];
+
+	for(i = 0; i < li.length; i++){
+
+		dbList = [];
+		var actualIndex = "";
+
+		// splitting string and storing it as an array
+		var rowContent = $( 'table tr' ).eq(li[i]).text().split("\n");
+		
+		for(j = 2; j < (rowContent.length - 1); j++){
+			actualIndex = rowContent[2];
+			dbList.push(rowContent[j]);
+		}
+
+		store[actualIndex] = dbList;
+	};
+
+	console.log(" store keys " + Object.keys(store));
+
+	return store;
+}

@@ -11,33 +11,33 @@ socket.on('db', function(incomingData){
 });
 
 $(document).ready(function() {
-    $('.fetchData').on('click', function() {
-    	
+    $('#btnGet').on('click', function() {	
     	console.log(" Data length " + data.length);
+    	var counter = 0;
+    	
+		$.ajax({
+      		type : 'GET',
+      		url : '/',
+    	});
+    	$('#datatbl tbody').empty();
 
-        for(i = 0; i < data.length; i++){
-            var clone = $('#template').clone(true).attr('id', '');
-            clone.find('.cb').html('<input type="checkbox" name="cb" value="' + data[i].id + '"/>');
-            clone.find('.id').html(data[i].id);
-            clone.find('.company').html(data[i].company);
-            clone.find('.site').html(data[i].site);
-           	if(data[i].main_site == true){
-            	clone.find('.mainSite').html('Yes');
-        	}else {
-        		clone.find('.mainSite').html('No');
-        	};
-            clone.find('.notes').html(data[i].notes);
-            clone.find('.phNumber').html(data[i].phone_number);
-            clone.find('.startDate').html(data[i].start_date);
-            clone.find('.endDate').html(data[i].end_date);
-        	clone.appendTo('table');
-    	}
-    	$('#btnGet').prop('disabled', true);
+		$.each(data, function(rowIndex, r) {
+		    var row = $("<tr/>");
+		    var bool = true;
+		    $.each(r, function(colIndex, c) {
+		    	if(bool){
+		    		row.append($("<td/>").prepend('<input type="checkbox" name="cb" value="' + c + '"/>'));
+		    		row.append($("<td/>").text(c));
+		    		bool = false;
+		    	} else {
+		    		row.append($("<td/>").text(c));
+		    	}
+		    });
+		    $('#tblbody').append(row);
+		});
 	});
-});
 
-$(function(){
-	$("button[name='del']").click(function(){
+	$("#btnDelete").click(function(){
 		var delPackage ={};
 
 		var checkedValues = $('input:checked').map(function() {
@@ -57,51 +57,48 @@ $(function(){
 	      		headers : {'Content-Type' : 'application/json'},
 	      		data : JSON.stringify(delPackage),
 	      		success : function(result) {
-	      			$('#btnUpdate').prop('disabled', true);
-	      			window.alert("Data Deleted.");
-	      			location.reload();
-	      		}
+	      			window.alert("Action Completed");
 	    	});
 		} else {
-			$('#btnUpdate').prop('disabled', true);
 			window.alert("No data selected.");
-			location.reload();
 		}
 
+		$('#btnUpdate').prop('disabled', true);
+		window.location.reload();
 	});
-});
-$(function(){
-	$('#tblData td').on('dblclick', function() {
+
+// convert table cell into textbox when double clicked
+	$('#tblbody').on('dblclick', 'td', function() {
 		var $this = $(this);
-		var $input = $('<input>', {
-		value: $this.text(),
-		type: 'text',
-		blur: function() {
-			$this.text(this.value);
-		},
-		keyup: function(e) {
-		   		if (e.which === 13) $input.blur();
-			}
-		})
-		.appendTo( $this.empty() ).focus();
+
+		// freezing index value
+		if($this.index() > 1){
+			var $input = $('<input>', {
+			value: $this.text(),
+			type: 'text',
+			blur: function() {
+				$this.text(this.value);
+			},
+			keyup: function(e) {
+			   		if (e.which === 13) $input.blur();
+				}
+			})
+			.appendTo( $this.empty() ).focus();
+		}
 	});
-});
 
 // get table first row value
-$(function(){
-	$("#tblData td").on('change', function(){
+	$("#tblbody").on('change', 'td', function(){
 		var $this = $(this);
 		$('#btnUpdate').prop('disabled', false);
 
 		var i = $this.parent().index();
-
+		console.log("clicked index " + i);
 		storeIndex.push(i);
 	})
-});
 
 // updating the table row
-$(function(){
-	$("button[name='update']").click(function(){
+	$("#btnUpdate").click(function(){
 		var uniqueIndex = getUniqueRowIndex(storeIndex);
 
 		// stores changed data
@@ -113,49 +110,95 @@ $(function(){
       		headers : {'Content-Type' : 'application/json'},
       		data : JSON.stringify(storeData),
       		success : function(result) {
+      			window.alert("Action Completed");
+      			storeIndex = [];
+      			window.location.reload();
       			$('#btnUpdate').prop('disabled', true);
-      			window.alert("Database Modified.");
-      			location.reload();
       		}
     	});
 	});
-});
 
-// checks for dublicates in an array
-function getUniqueRowIndex(li) {
-	var result = [];
+	// checks for dublicates in an array
+	function getUniqueRowIndex(li) {
+		var result = [];
 
-	$.each(li, function(i, e) {
-		if ($.inArray(e, result) == -1) {
-			console.log("index " + e);
-			result.push(e);
+		$.each(li, function(i, e) {
+			if ($.inArray(e, result) == -1) {
+				console.log("index " + e);
+				result.push(e);
+			}
+		});
+		
+		return result;
+	}
+
+	function getRowData(li){
+		var store = {};
+		var dbList = [];
+
+		for(i = 0; i < li.length; i++){
+
+			dbList = [];
+
+		    var $row = $('#tblbody').find('tr').eq(li[i]);
+		    var $tds = $row.find('td');
+
+			dbList[0] = $tds.eq(1).text();
+			dbList[1] = $tds.eq(2).text();
+			dbList[2] = $tds.eq(3).text();
+			dbList[3] = $tds.eq(4).text();
+			dbList[4] = $tds.eq(5).text();
+			dbList[5] = $tds.eq(6).text();
+			dbList[6] = $tds.eq(7).text();
+			dbList[7] = $tds.eq(8).text();
+
+		    console.log("check " + $tds.eq(1).text());
+
+			store[i] = dbList;
+		};
+
+		return store;
+	}
+
+	var counter = 0;
+
+	$('#btnAdd').click(function(){
+
+		$('#btnAdd').prop('disabled', true);
+		
+		if(counter == 0) {
+			counter++;
+			var data = {
+				'true': 'Yes',
+				'false': 'No'
+			}
+
+			var s = $('<select />', { name: 'mainSite'});
+
+			for(var val in data) {
+				$('<option />', {value: val, text: data[val]}).appendTo(s);
+			}
+
+			$('#middle').after().append(
+		        $('<form />', { action: '/newEntry', method: 'POST' }).append(
+		            $('<input />', { name: 'company', placeholder: 'Company Name', type: 'text' }),
+		            $('<input />', { name: 'site', placeholder: 'Site', type: 'text' }),
+		            $(s),
+		            $('<input />', { name: 'notes', placeholder: 'Note', type: 'text' }),
+		            $('<input />', { name: 'phNumber', placeholder: 'Ph Number', type: 'text' }),
+		            $('<input />', { name: 'startDate', placeholder: 'Start - dd-mm-yyyy', type: 'text' }),
+		            $('<input />', { name: 'endDate', placeholder: 'End - dd-mm-yyyy', type: 'text' }),
+		            $('<br />'),
+		            $('<input />', { type: 'submit', id: 'submit', value: 'Submit' })
+		        )
+		    )
 		}
 	});
+
+	$('#submit').click(function(){
+		counter--;
+		$('#btnAdd').prop('disabled', false);
+		window.location.reload();
+	});
 	
-	return result;
-}
-
-function getRowData(li){
-	var store = {};
-	var dbList = [];
-
-	for(i = 0; i < li.length; i++){
-
-		dbList = [];
-		var actualIndex = "";
-
-		// splitting string and storing it as an array
-		var rowContent = $( 'table tr' ).eq(li[i]).text().split("\n");
-		
-		for(j = 2; j < (rowContent.length - 1); j++){
-			actualIndex = rowContent[2];
-			dbList.push(rowContent[j]);
-		}
-
-		store[actualIndex] = dbList;
-	};
-
-	console.log(" store keys " + Object.keys(store));
-
-	return store;
-}
+});

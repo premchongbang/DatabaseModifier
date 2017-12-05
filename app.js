@@ -47,7 +47,7 @@ var sendPackage = [];
 
 // This responds with "Hello World" on the homepage
 app.get('/', function (req, res) {
-
+	sendPackage = [];
 	pool2.connect().then(client => {
 		client.query('SELECT * FROM site_information;').then(res => {
 		client.release()
@@ -71,24 +71,25 @@ app.get('/', function (req, res) {
 });
 
 app.post('/newEntry', function (req, res) {
-	var company = req.body.company;
-	var site = req.body.site;
-	var mainSite = req.body.mainSite;
-	var notes = req.body.notes;
-	var phnum = req.body.phNumber;
-	var startDate = req.body.startDate;
-	var endDate = req.body.endDate;
+	var company = req.body.company.trim();
+	var site = req.body.site.trim();
+	var mainSite = req.body.mainSite.trim();
+	var notes = req.body.notes.trim();
+	var phnum = req.body.phNumber.trim();
+	var startDate = req.body.startDate.trim();
+	var endDate = req.body.endDate.trim();
 
 	// validating data
-	if(company.replace(/\s/g, '') == "" || site.replace(/\s/g, '') == "" || mainSite == "" || phnum == "" || !servercode.isDateValid(startDate) || !servercode.isDateValid(endDate) || !servercode.isDateInValidOrder(startDate, endDate)) {
+	if(company == "" || site == "" || mainSite == "" || isNaN(phnum) || !servercode.isDateValid(startDate) || !servercode.isDateValid(endDate) || !servercode.isDateInValidOrder(startDate, endDate)) {
 		console.log("Empty or Unacceptable data format.");
 	} else {
-		if(mainSite.toLowerCase() == "yes" || mainSite.toLowerCase() == "no"){
+		if(mainSite.toLowerCase() == "true" || mainSite.toLowerCase() == "false"){
 			var customQuery = "INSERT INTO site_information (company, site, main_site, Notes, phone_number, start_date, end_date) VALUES ('"+ 
 																																company +"', '"+ site +"', '"+ 
 																																mainSite +"', '"+ notes +"', '"+ 
 																																phnum +"', '"+ startDate +"', '"+ 
 																																endDate +"');";
+			console.log(customQuery);
 
 			pool2.connect().then(client => {
 				client.query(customQuery).then(res => {
@@ -125,11 +126,11 @@ app.post('/updateDB', function (req, res) {
 		try {
 		  	for (var k in obj) {
 				var objLength = obj[k].length;
-				var customQuery = "";
-				var id = parseInt(k) - 1;
-				console.log("key count " + k);
+				
+				console.log("key count " + objLength);
 				// creating query by extracting data
-
+				console.log(obj[k][0].trim());
+				var id =  parseInt(obj[k][0].trim());
 				var company = obj[k][1].trim();
 				var site = obj[k][2].trim();
 				var mainSite = obj[k][3].trim() ;
@@ -139,21 +140,22 @@ app.post('/updateDB', function (req, res) {
 				var endDate = obj[k][7].trim();
 
 				//data validation
-				if(company == "" || site == "" || mainSite == "" || phnum == "" || !servercode.isDateValid(startDate) || !servercode.isDateValid(endDate) || !servercode.isDateInValidOrder(startDate, endDate) || mainSite == ""){
+				if(company == "" || site == "" || mainSite == "" || isNaN(phnum) || !servercode.isDateValid(startDate) || !servercode.isDateValid(endDate) || !servercode.isDateInValidOrder(startDate, endDate) || mainSite == ""){
 					console.log("Empty or Unacceptable data format.");
 				} else {
-					if(mainSite.toLowerCase() == "yes" || mainSite.toLowerCase() == "no"){
+					if(mainSite.toLowerCase() == "true" || mainSite.toLowerCase() == "false"){
 
-						customQuery = "UPDATE site_information SET company = '" + company + 
+						var customQuery = "UPDATE site_information SET company = '" + company + 
 																"', site='" + site + 
 																"', main_site='" + mainSite+ 
 																"', notes='" +  notes + 
 																"',phone_number='" + phnum + 
 																"',start_date='" + startDate + 
 																"',end_date='" + endDate + 
-																"' WHERE id = " + obj[k][0].trim() + ";";
-
+																"' WHERE id = " + id + ";";
 						var result = await client.query(customQuery);
+					} else {
+						console.log("Boolean value wrong");
 					}
 				}
 			}
@@ -174,15 +176,28 @@ app.post('/deleteDB', function(req, res){
 		var client = await pool2.connect()
 	  	try {
 	  		for(var k in obj) {
-				console.log("key length " + obj[k].length);
-				for(i =0; i < obj[k].length; i++) {
-			
-					var customQuery = "DELETE FROM site_information WHERE ID = '" + obj[k][i] + "';";
-			
-					var result = await client.query(customQuery);
+	  			var len = obj[k].length;
+	  			var customQuery = "";
+				console.log("key length " + len);
+
+				if(len <= 1){
+					customQuery = "DELETE FROM site_information WHERE ID = '" + obj[k][0] + "';";
+				} else {
+					var ids = "";
+
+					for(i = 0; i < len; i++) {
+						if(i == len - 1){
+							ids += "'" +obj[k][i] + "'";
+						} else {
+							ids += "'" +obj[k][i] + "', ";
+						}
+					}
+					customQuery = "DELETE FROM site_information WHERE ID IN (" + ids + ");";
 				}
+			
+				var result = await client.query(customQuery);
+				console.log(customQuery);
 			}
-			console.log(customQuery);
 		} finally {
     		client.release()
   		}
@@ -204,6 +219,8 @@ io.on('connection', function(socket){
 	sendPackage = [];
 	socket.on('disconnect', function(){
 	  console.log('User Disconnected');
+	  socket.emit('db', sendPackage);
+	  sendPackage = [];
 	});
 });
 
