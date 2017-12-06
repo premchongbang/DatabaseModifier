@@ -19,7 +19,11 @@ module.exports={
 		if(startDate <= endDate){
 			return true;
 		} else {
+<<<<<<< HEAD
+			//console.log("its false " + startDate + " " + endDate);
+=======
 			console.log("its false " + startDate + " " + endDate);
+>>>>>>> f02e03f519e708af99ad1c3c161ec5e20c1e043e
 			return false;
 		}
 	},

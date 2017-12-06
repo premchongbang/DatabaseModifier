@@ -47,6 +47,25 @@ var sendPackage = [];
 
 // This responds with "Hello World" on the homepage
 app.get('/', function (req, res) {
+<<<<<<< HEAD
+	(async () => {
+		var pool = new Pool()
+		var client = await pool2.connect()
+		try {
+			var customQuery = 'SELECT * FROM site_information;';
+
+			var res = await client.query(customQuery);
+				
+			for (i = 0; i < res.rows.length; i++) { 
+				var data = res.rows[i];
+	    		sendPackage[i] = data;
+			};
+		} finally {
+	    	client.release()
+	  	}
+	})().catch(e => console.error(e.message, e.stack))
+	
+=======
 	pool2.connect().then(client => {
 		client.query('SELECT * FROM site_information;').then(res => {
 		client.release()
@@ -66,7 +85,30 @@ app.get('/', function (req, res) {
 		console.error('connection error', e.message, e.stack)
 	})
 
+>>>>>>> f02e03f519e708af99ad1c3c161ec5e20c1e043e
 	res.render('index.html');
+});
+
+//gets data
+app.get('/getData', function (req, res) {
+	(async () => {
+		var pool = new Pool()
+		var client = await pool2.connect()
+		try {
+			var customQuery = 'SELECT * FROM site_information;';
+
+			var res = await client.query(customQuery);
+				
+			for (i = 0; i < res.rows.length; i++) { 
+				var data = res.rows[i];
+	    		sendPackage[i] = data;
+			};
+		} finally {
+	    	client.release()
+	  	}
+	})().catch(e => console.error(e.message, e.stack))
+	
+	res.send(sendPackage);
 });
 
 app.post('/newEntry', function (req, res) {
@@ -92,16 +134,11 @@ app.post('/newEntry', function (req, res) {
 
 			pool2.connect().then(client => {
 				client.query(customQuery).then(res => {
-				client.release()
-				
-				for (i = 0; i < res.rows.length; i++) { 
-		    		sendPackage[i] = res.rows[i];
-				};
-
+					client.release()
 				})
 				.catch(e => {
-				client.release()
-				console.error('query error', e.message, e.stack)
+					client.release()
+					console.error('query error', e.message, e.stack)
 				})
 			})
 			.catch(e => {
@@ -126,9 +163,14 @@ app.post('/updateDB', function (req, res) {
 		  	for (var k in obj) {
 				var objLength = obj[k].length;
 				
+<<<<<<< HEAD
+				//console.log("key count " + objLength);
+				// creating query by extracting data
+=======
 				console.log("key count " + objLength);
 				// creating query by extracting data
 				console.log(obj[k][0].trim());
+>>>>>>> f02e03f519e708af99ad1c3c161ec5e20c1e043e
 				var id =  parseInt(obj[k][0].trim());
 				var company = obj[k][1].trim();
 				var site = obj[k][2].trim();
@@ -152,7 +194,11 @@ app.post('/updateDB', function (req, res) {
 																"',start_date='" + startDate + 
 																"',end_date='" + endDate + 
 																"' WHERE id = " + id + ";";
+<<<<<<< HEAD
+						await client.query(customQuery);
+=======
 						var result = await client.query(customQuery);
+>>>>>>> f02e03f519e708af99ad1c3c161ec5e20c1e043e
 					} else {
 						console.log("Boolean value wrong");
 					}
@@ -194,7 +240,11 @@ app.post('/deleteDB', function(req, res){
 					customQuery = "DELETE FROM site_information WHERE ID IN (" + ids + ");";
 				}
 			
+<<<<<<< HEAD
+				await client.query(customQuery);
+=======
 				var result = await client.query(customQuery);
+>>>>>>> f02e03f519e708af99ad1c3c161ec5e20c1e043e
 				console.log(customQuery);
 			}
 		} finally {

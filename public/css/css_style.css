@@ -63,4 +63,13 @@ h2{
 input[type=text] {
     margin: 5px 5px 5px 2px;
     box-sizing: border-box;
+<<<<<<< HEAD
+}
+
+p {
+	margin: 10px 10px 10px 10px;
+	padding: 10px;
+	font-weight: bold;
+=======
+>>>>>>> f02e03f519e708af99ad1c3c161ec5e20c1e043e
 }
