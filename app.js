@@ -47,7 +47,6 @@ var sendPackage = [];
 
 // This responds with "Hello World" on the homepage
 app.get('/', function (req, res) {
-	sendPackage = [];
 	pool2.connect().then(client => {
 		client.query('SELECT * FROM site_information;').then(res => {
 		client.release()
@@ -218,9 +217,8 @@ io.on('connection', function(socket){
 	socket.emit('db', sendPackage);
 	sendPackage = [];
 	socket.on('disconnect', function(){
-	  console.log('User Disconnected');
-	  socket.emit('db', sendPackage);
-	  sendPackage = [];
+		socket.emit('db', sendPackage);
+		console.log('User Disconnected');
 	});
 });
 

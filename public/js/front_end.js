@@ -15,10 +15,6 @@ $(document).ready(function() {
     	console.log(" Data length " + data.length);
     	var counter = 0;
     	
-		$.ajax({
-      		type : 'GET',
-      		url : '/',
-    	});
     	$('#datatbl tbody').empty();
 
 		$.each(data, function(rowIndex, r) {
@@ -58,6 +54,7 @@ $(document).ready(function() {
 	      		data : JSON.stringify(delPackage),
 	      		success : function(result) {
 	      			window.alert("Action Completed");
+	      		}
 	    	});
 		} else {
 			window.alert("No data selected.");
@@ -112,8 +109,8 @@ $(document).ready(function() {
       		success : function(result) {
       			window.alert("Action Completed");
       			storeIndex = [];
-      			window.location.reload();
       			$('#btnUpdate').prop('disabled', true);
+      			window.location.reload();
       		}
     	});
 	});
@@ -200,5 +197,4 @@ $(document).ready(function() {
 		$('#btnAdd').prop('disabled', false);
 		window.location.reload();
 	});
-	
 });
