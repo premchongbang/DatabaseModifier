@@ -234,7 +234,6 @@ io.on('connection', function(socket){
 	socket.emit('db', sendPackage);
 	sendPackage = [];
 	socket.on('disconnect', function(){
-		socket.emit('db', sendPackage);
 		console.log('User Disconnected');
 	});
 });
